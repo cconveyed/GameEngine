@@ -7,6 +7,7 @@ ARATIO = SCREENW/SCREENH
 
 FOV = pi/1.3
 
+
 FOVRAD = 1 / tan(FOV/2)
 zfar = 1000
 znear = 1
