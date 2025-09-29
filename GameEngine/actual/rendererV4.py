@@ -1,7 +1,7 @@
 import pygame
 import numpy as np
 from math import *
-SCREENW = 1000
+SCREENW = 2000
 SCREENH = 1000
 ARATIO = SCREENW/SCREENH
 
@@ -25,12 +25,14 @@ dtheta = pi/5000
 class Renderer():
     def __init__(self, all_vertices):
         self.test_points = all_vertices
-        self.WIDTH, self.HEIGHT = 1000,600
+        self.WIDTH, self.HEIGHT = 1000,1000
         self.BLACK, self.WHITE = (0,0,0), (255,255,255)
-        self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
+        self.screen = pygame.display.set_mode((SCREENW, SCREENH))
+        
+        self.ARATIO = self.HEIGHT/self.WIDTH
         
         self.projection_matrix = np.array(
-            ([ARATIO*FOVRAD,0,0,0],
+            ([FOVRAD/ARATIO,0,0,0],
             [0,FOVRAD,0,0],
             [0,0,znorm,1],
             [0,0,-1*znorm*znear,0])
@@ -121,6 +123,7 @@ class Renderer():
         # return (np.matmul(point, self.projection_matrix) / w)[:2]
         # return ((point @ self.projection_matrix) / w)[:2]
         ndc = ((point @ self.projection_matrix) / z)[:2]
+        print(ndc)
         new = np.array([SCREENW*(ndc[0]+1)/2, SCREENH*(1-ndc[1])/2])
         return new
 
