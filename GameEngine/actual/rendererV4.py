@@ -13,6 +13,13 @@ zfar = 1000
 znear = 1
 znorm = zfar / (zfar-znear)
 
+
+
+ztes = (zfar+znear)/(zfar-znear)
+ztes2 = 2*zfar*znear/(zfar-znear)
+
+
+
 dtheta = pi/5000
 
 class Renderer():
@@ -28,6 +35,13 @@ class Renderer():
             [0,0,znorm,1],
             [0,0,-1*znorm*znear,0])
             )
+        
+        # self.projection_matrix = np.array(
+        #     ([ARATIO*FOVRAD,0,0,0],
+        #     [0,FOVRAD,0,0],
+        #     [0,0,ztes,1],
+        #     [0,0,1*ztes2,0])
+        #     )
     
     
     def rx(self, point, centre_of_rot):
@@ -58,13 +72,14 @@ class Renderer():
             [x_centre, y_centre, z_centre, 1]
                     ))     
             
-        rotation_matrix = T_to_origin.dot(rx_matrix).dot(T_back)
+        # rotation_matrix = T_to_origin.dot(rx_matrix).dot(T_back)
         #change made here. .dot() will do matmul if the matrices are 2d and higher, but will do dot product if matrices are 1d      
         rotation_matrix = T_to_origin @ rx_matrix @ T_back
         #order of mat operations depends on whether your point is a row or column vector
         #engineer a development mistake by reversing the order of operations and observing the weird 3d behaviour
         #@ is the new standard for matmul
-        return np.matmul(point, rotation_matrix)
+        # return np.matmul(point, rotation_matrix)
+        return point @ rotation_matrix
 
     def rz(self, point, centre_of_rot):
         x,y,z,w = point
@@ -92,8 +107,10 @@ class Renderer():
                     ))
             
             
-        rotation_matrix = T_to_origin.dot(rz_matrix).dot(T_back)
-        return np.matmul(point, rotation_matrix)
+        # rotation_matrix = T_to_origin.dot(rz_matrix).dot(T_back)
+        rotation_matrix = T_to_origin @ rz_matrix @ T_back
+        # return np.matmul(point, rotation_matrix)
+        return point @ rotation_matrix
 
     def invert_y(self,screen_coords):
         return np.array([screen_coords[0], SCREENH - screen_coords[1]])
@@ -101,7 +118,12 @@ class Renderer():
     def project(self, point):
         x,y,z,w = point
         point = np.array(([x,y,z,w]))
-        return (np.matmul(point, self.projection_matrix) / w)[:2]
+        # return (np.matmul(point, self.projection_matrix) / w)[:2]
+        # return ((point @ self.projection_matrix) / w)[:2]
+        ndc = ((point @ self.projection_matrix) / z)[:2]
+        new = np.array([SCREENW*(ndc[0]+1)/2, SCREENH*(1-ndc[1])/2])
+        return new
+
 
     def draw_triangle(self, tri_points):
         projected_points = [self.project(i) for i in tri_points]
@@ -109,11 +131,28 @@ class Renderer():
         pygame.draw.line(self.screen, self.WHITE, projected_points[1], projected_points[2])
         pygame.draw.line(self.screen, self.WHITE, projected_points[0], projected_points[2])
         
+    def cam(self, target, pos, up):
+        self.newfor = target - pos
+        self.newfor = np.linalg.norm(self.newfor)
+
+        self.a = self.newfor @ (np.dot(up, self.newfor))
+
+        self.newup = up - self.a
+        self.newup = np.linalg.norm(self.newup)
+
+        self.newright = np.cross(self.newup, self.newfor)
+
+        self.p = np.array([[self.newright],
+                           [],
+                           [],
+                           []])
+
+
     
     def run(self):
         self.running = True
         
-        self.rotation_point = (1350,1350,1350,1)
+        self.rotation_point = (1500,1500,1500,1)
         while self.running:
             self.rotated_points = [self.rx(self.rz(i, self.rotation_point), self.rotation_point) for i in self.test_points]
             self.test_points = self.rotated_points
@@ -142,10 +181,10 @@ class Renderer():
             
             
             
-            pygame.draw.line(self.screen, self.WHITE, self.project(self.rotation_point), self.project(self.test_points[2]))
-            pygame.draw.line(self.screen, self.WHITE, self.project((300,300,300,1)), self.project((0,300,300,1)))
-            pygame.draw.line(self.screen, self.WHITE, self.project((600,500,500,1)), self.project((800,700,1000,1)))
-            pygame.draw.line(self.screen, self.WHITE, self.project((600,500,500,1)), self.project((700,700,1000,1)))
+            # pygame.draw.line(self.screen, self.WHITE, self.project(self.rotation_point), self.project(self.test_points[2]))
+            # pygame.draw.line(self.screen, self.WHITE, self.project((300,300,300,1)), self.project((0,300,300,1)))
+            # pygame.draw.line(self.screen, self.WHITE, self.project((600,500,500,1)), self.project((800,700,1000,1)))
+            # pygame.draw.line(self.screen, self.WHITE, self.project((600,500,500,1)), self.project((700,700,1000,1)))
             
             
             pygame.display.flip()
@@ -155,13 +194,13 @@ class Renderer():
 
 cube = [
 (1300,1300,1300,1),
-(1300,1300,1400,1),
-(1300,1400,1300,1),
-(1300,1400,1400,1),
-(1400,1300,1300,1),
-(1400,1300,1400,1),
-(1400,1400,1300,1),
-(1400,1400,1400,1)]
+(1300,1300,1700,1),
+(1300,1700,1300,1),
+(1300,1700,1700,1),
+(1700,1300,1300,1),
+(1700,1300,1700,1),
+(1700,1700,1300,1),
+(1700,1700,1700,1)]
 
 
 game = Renderer(cube)

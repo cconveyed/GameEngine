@@ -35,7 +35,8 @@ class Renderer():
     def project(self, point):
         x,y,z,w = point
         point = np.array(([x,y,z,w]))
-        return (np.matmul(point, self.projection_matrix) / w)[:2]
+        # return (np.matmul(point, self.projection_matrix) / w)[:2]
+        return ((point @ self.projection_matrix) / w)[:2]
 
     def draw_triangle(self, tri_points):
         projected_points = [self.project(i) for i in tri_points]
@@ -72,7 +73,7 @@ class Renderer():
             
             
             
-            pygame.draw.line(self.screen, self.WHITE, self.project(self.rotation_point), self.project(self.test_points[2]))
+            pygame.draw.line(self.screen, self.WHITE, self.project((1000,1000,1000,1)), self.project(self.test_points[2]))
             pygame.draw.line(self.screen, self.WHITE, self.project((300,300,300,1)), self.project((0,300,300,1)))
             pygame.draw.line(self.screen, self.WHITE, self.project((600,500,500,1)), self.project((800,700,1000,1)))
             pygame.draw.line(self.screen, self.WHITE, self.project((600,500,500,1)), self.project((700,700,1000,1)))
