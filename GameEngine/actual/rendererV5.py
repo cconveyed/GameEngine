@@ -38,6 +38,14 @@ class Renderer():
             [0,0,-1*znorm*znear,0])
             )
         
+
+        self.view_matrix = None
+
+        self.yaw, self.pitch = 0, 0
+        self.u = np.array([0,1,0])
+        self.camera_position = np.array([0,0,0])
+        self.f = np.array([0,0,0])
+        
         # self.projection_matrix = np.array(
         #     ([ARATIO*FOVRAD,0,0,0],
         #     [0,FOVRAD,0,0],
@@ -123,11 +131,10 @@ class Renderer():
         point = np.array(([x,y,z,w]))
         # return (np.matmul(point, self.projection_matrix) / w)[:2]
         # return ((point @ self.projection_matrix) / w)[:2]
-        ndc = ((point @ self.projection_matrix) / z)[:2]
-        print(ndc)
+        cam_space = point @ self.view_matrix
+        ndc = ((cam_space @ self.projection_matrix) / -z)[:2]
         new = np.array([SCREENW*(ndc[0]+1)/2, SCREENH*(1-ndc[1])/2])
         return new
-
 
     def draw_triangle(self, tri_points):
         projected_points = [self.project(i) for i in tri_points]
@@ -135,31 +142,37 @@ class Renderer():
         pygame.draw.line(self.screen, self.WHITE, projected_points[1], projected_points[2])
         pygame.draw.line(self.screen, self.WHITE, projected_points[0], projected_points[2])
         
-    def cam(self, target, pos, up):
-        self.newfor = target - pos
-        self.newfor = np.linalg.norm(self.newfor)
+    def update_view(self):
+        self.fx = cos(self.yaw) * cos(self.pitch)
+        self.fy = sin(self.pitch)
+        self.fz = sin(self.yaw) * cos(self.pitch)
 
-        self.a = self.newfor @ (np.dot(up, self.newfor))
+        self.f = np.array([self.fx, self.fy, self.fz]) / np.linalg.norm(np.array([self.fx, self.fy, self.fz]))
+        self.r = np.cross(self.f, self.u) / np.linalg.norm(np.cross(self.f, self.u))
+        self.u = np.cross(self.r, self.f) / np.linalg.norm(np.cross(self.r, self.f))
+        self.c = self.camera_position 
 
-        self.newup = up - self.a
-        self.newup = np.linalg.norm(self.newup)
-
-        self.newright = np.cross(self.newup, self.newfor)
-
-        self.p = np.array([[self.newright],
-                           [],
-                           [],
-                           []])
+        self.view_matrix = np.array(
+            ([self.r[0],self.u[0],self.f[0],0],
+            [self.r[1],self.u[1],self.f[1],0],
+            [self.r[2],self.u[2],self.f[2],0],
+            [np.dot(-self.r, self.c), np.dot(-self.u, self.c), np.dot(-self.f, self.c), 1]))
 
 
-    
+    def update_yaw_pitch(self, dx, dy):
+        self.yaw += dx * 0.001
+        self.pitch += dy * 0.001
+
     def run(self):
         self.running = True
         
         self.rotation_point = (1500,1500,1500,1)
+        x0, y0 = 50, 50
+
         while self.running:
             dt = clock.tick(60) / 1000
     
+            self.update_view()
             self.rotated_points = [self.rx(self.rz(i, self.rotation_point, 2, dt), self.rotation_point, 2, dt) for i in self.test_points]
             self.test_points = self.rotated_points
             pygame.event.get()
@@ -183,8 +196,21 @@ class Renderer():
             
             self.draw_triangle([self.test_points[1],self.test_points[3],self.test_points[5]])
             self.draw_triangle([self.test_points[1], self.test_points[5], self.test_points[7]])
-            
-            
+
+
+
+            self.keys = pygame.key.get_pressed()
+            if self.keys[pygame.K_w]:
+                self.camera_position = self.camera_position + (5000 * self.f)
+            if self.keys[pygame.K_a]:
+                self.camera_position = self.camera_position - (200 * self.r * dt)
+            if self.keys[pygame.K_d]:
+                self.camera_position = self.camera_position + (200 * self.r * dt)
+
+            x1, y1 = pygame.mouse.get_pos()
+            dx, dy = x1 - x0, y1 - y0
+            x0, y0 = x1, y1
+            self.update_yaw_pitch(dx, dy)
             
             
             # pygame.draw.line(self.screen, self.WHITE, self.project(self.rotation_point), self.project(self.test_points[2]))
