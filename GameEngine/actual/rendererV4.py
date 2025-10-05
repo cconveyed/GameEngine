@@ -18,7 +18,7 @@ znorm = zfar / (zfar-znear)
 ztes = (zfar+znear)/(zfar-znear)
 ztes2 = 2*zfar*znear/(zfar-znear)
 
-
+clock = pygame.time.Clock()
 
 dtheta = pi/5000
 
@@ -157,6 +157,8 @@ class Renderer():
         
         self.rotation_point = (1500,1500,1500,1)
         while self.running:
+            dt = clock.tick(60) / 1000
+    
             self.rotated_points = [self.rx(self.rz(i, self.rotation_point), self.rotation_point) for i in self.test_points]
             self.test_points = self.rotated_points
             pygame.event.get()
