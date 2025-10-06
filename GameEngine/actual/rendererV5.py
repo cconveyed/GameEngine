@@ -43,7 +43,7 @@ class Renderer():
 
         self.yaw, self.pitch = 0, 0
         self.u = np.array([0,1,0])
-        self.camera_position = np.array([0,0,0])
+        self.camera_position = np.array([1100,1100,1100])
         self.f = np.array([0,0,0])
         
         # self.projection_matrix = np.array(
@@ -129,10 +129,9 @@ class Renderer():
     def project(self, point):
         x,y,z,w = point
         point = np.array(([x,y,z,w]))
-        # return (np.matmul(point, self.projection_matrix) / w)[:2]
-        # return ((point @ self.projection_matrix) / w)[:2]
         cam_space = point @ self.view_matrix
-        ndc = ((cam_space @ self.projection_matrix) / -z)[:2]
+        clip_space = cam_space @ self.projection_matrix
+        ndc = ((clip_space) / -clip_space[3])[:2]
         new = np.array([SCREENW*(ndc[0]+1)/2, SCREENH*(1-ndc[1])/2])
         return new
 
@@ -143,9 +142,9 @@ class Renderer():
         pygame.draw.line(self.screen, self.WHITE, projected_points[0], projected_points[2])
         
     def update_view(self):
-        self.fx = cos(self.yaw) * cos(self.pitch)
+        self.fx = sin(self.yaw) * cos(self.pitch)
         self.fy = sin(self.pitch)
-        self.fz = sin(self.yaw) * cos(self.pitch)
+        self.fz = cos(self.yaw) * cos(self.pitch)
 
         self.f = np.array([self.fx, self.fy, self.fz]) / np.linalg.norm(np.array([self.fx, self.fy, self.fz]))
         self.r = np.cross(self.f, self.u) / np.linalg.norm(np.cross(self.f, self.u))
@@ -156,12 +155,17 @@ class Renderer():
             ([self.r[0],self.u[0],self.f[0],0],
             [self.r[1],self.u[1],self.f[1],0],
             [self.r[2],self.u[2],self.f[2],0],
-            [np.dot(-self.r, self.c), np.dot(-self.u, self.c), np.dot(-self.f, self.c), 1]))
+            [-np.dot(self.r, self.c), -np.dot(self.u, self.c), -np.dot(self.f, self.c), 1]))
 
 
     def update_yaw_pitch(self, dx, dy):
-        self.yaw += dx * 0.001
-        self.pitch += dy * 0.001
+        self.yaw -= dx * 0.002
+        self.pitch -= dy * 0.002
+        
+        if self.pitch > 80/360 * 2 * pi:
+            self.pitch = 80/360 * 2 * pi
+        if self.pitch < -80/360 * 2 * pi:
+            self.pitch = -80/360 * 2 * pi
 
     def run(self):
         self.running = True
@@ -201,12 +205,13 @@ class Renderer():
 
             self.keys = pygame.key.get_pressed()
             if self.keys[pygame.K_w]:
-                self.camera_position = self.camera_position + (5000 * self.f)
+                self.camera_position = self.camera_position + 10
             if self.keys[pygame.K_a]:
-                self.camera_position = self.camera_position - (200 * self.r * dt)
+                self.camera_position = self.camera_position + (1000 * self.r * dt)
             if self.keys[pygame.K_d]:
-                self.camera_position = self.camera_position + (200 * self.r * dt)
-
+                self.camera_position = self.camera_position - (1000 * self.r * dt)
+            if self.keys[pygame.K_s]:
+                self.camera_position = self.camera_position - 10
             x1, y1 = pygame.mouse.get_pos()
             dx, dy = x1 - x0, y1 - y0
             x0, y0 = x1, y1
