@@ -27,8 +27,9 @@ class Renderer():
         self.test_points = all_vertices
         self.WIDTH, self.HEIGHT = 1000,1000
         self.BLACK, self.WHITE = (0,0,0), (255,255,255)
-        self.screen = pygame.display.set_mode((SCREENW, SCREENH))
-        
+        pygame.init()
+        self.h = pygame.display.Info()
+        self.screen = pygame.display.set_mode((self.h.current_w, self.h.current_h))
         self.ARATIO = self.HEIGHT/self.WIDTH
         
         self.projection_matrix = np.array(
