@@ -40,6 +40,12 @@ class Renderer():
             [0,0,self.znorm,1],
             [0,0,-1*self.znorm*self.znear,0])
             )
+        
+        clip_space = point @ self.projection_matrix
+        return clip_space
+
+
+
 
     def run(self):
         self.running = True
@@ -47,6 +53,9 @@ class Renderer():
         while self.running:
             #establishes delta-time and regulates the refresh rate of the event loop
             dt = self.clock.tick(60) / 1000
+
+            py.draw.line(self.screen, self.WHITE, projected_points[0], projected_points[1])
+
             #checks for input events
             for event in py.event.get():
                 #if a user tries to terminate the window, the event loop will cease
