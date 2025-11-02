@@ -7,7 +7,8 @@ import numpy as np
 class Renderer():
     def __init__(self):
         #RGB colour identifiers
-        self.BLACK, self.WHITE = (0,0,0), (255,255,255)
+        self.BLACK, self.WHITE, self.GREEN = (0,0,0), (255,255,255), (0,255,0)
+        self.ORANGE, self.NAVY = (255,165,0), (0,0,128)
         #initialises pygame
         py.init()
         #instantiate the pygame clock object
@@ -44,26 +45,33 @@ class Renderer():
         clip_space = point @ self.projection_matrix
         return clip_space
 
-
+    #draws 3 coloured lines between 3 specified vertices packed in a tuple tri_points
+    def draw_triangle(self, tri_points, colour):
+        py.draw.line(self.screen, colour, tri_points[0], tri_points[1])
+        py.draw.line(self.screen, colour, tri_points[1], tri_points[2])
+        py.draw.line(self.screen, colour, tri_points[0], tri_points[2])
 
 
     def run(self):
         self.running = True
+        
+        test_point = self.project((180,567,3420))
+        print(test_point[0], test_point[1], test_point[2], test_point[3])
+        
         #event/game loop
         while self.running:
             #establishes delta-time and regulates the refresh rate of the event loop
             dt = self.clock.tick(60) / 1000
-
-            py.draw.line(self.screen, self.WHITE, projected_points[0], projected_points[1])
-
             #checks for input events
             for event in py.event.get():
                 #if a user tries to terminate the window, the event loop will cease
                 if event.type == py.QUIT:
                     self.running = False
-
             #sets the screen to black
-            self.screen.fill(self.BLACK)
+            self.screen.fill(self.NAVY)
+            #draws a orange triangle by calling self.draw_triangle      
+            self.draw_triangle(((100,100), (1000,1000), (1300,600)), self.ORANGE)
+            
             #pygame's method of refreshing the screen 
             py.display.flip()
         #terminates the window once the event loop has ceased
