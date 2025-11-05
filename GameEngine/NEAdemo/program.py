@@ -46,10 +46,19 @@ class Renderer():
         return clip_space
 
     #draws 3 coloured lines between 3 specified vertices packed in a tuple tri_points
+    # def draw_triangle(self, tri_points, colour):
+    #     py.draw.line(self.screen, colour, tri_points[0], tri_points[1])
+    #     py.draw.line(self.screen, colour, tri_points[1], tri_points[2])
+    #     py.draw.line(self.screen, colour, tri_points[0], tri_points[2])
+
+
+    #draws 3 coloured lines between 3 specified vertices packed in a tuple tri_points
     def draw_triangle(self, tri_points, colour):
-        py.draw.line(self.screen, colour, tri_points[0], tri_points[1])
-        py.draw.line(self.screen, colour, tri_points[1], tri_points[2])
-        py.draw.line(self.screen, colour, tri_points[0], tri_points[2])
+        #projects all three points and stores them in a list projected_points
+        projected_points = [self.project(i) for i in tri_points]
+        py.draw.line(self.screen, colour, projected_points[0], projected_points[1])
+        py.draw.line(self.screen, colour, projected_points[1], projected_points[2])
+        py.draw.line(self.screen, colour, projected_points[0], projected_points[2])
 
 
     def run(self):
@@ -70,7 +79,7 @@ class Renderer():
             #sets the screen to black
             self.screen.fill(self.NAVY)
             #draws a orange triangle by calling self.draw_triangle      
-            self.draw_triangle(((100,100), (1000,1000), (1300,600)), self.ORANGE)
+            self.draw_triangle(((100,100,100), (1000,1000,2000), (1300,600,5)), self.ORANGE)
             
             #pygame's method of refreshing the screen 
             py.display.flip()
