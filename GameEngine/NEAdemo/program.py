@@ -64,8 +64,6 @@ class Renderer():
     def run(self):
         self.running = True
         
-        test_point = self.project((180,567,3420))
-        print(test_point[0], test_point[1], test_point[2], test_point[3])
         
         #event/game loop
         while self.running:
@@ -78,8 +76,11 @@ class Renderer():
                     self.running = False
             #sets the screen to black
             self.screen.fill(self.NAVY)
-            #draws a orange triangle by calling self.draw_triangle      
-            self.draw_triangle(((100,100,100), (1000,1000,2000), (1300,600,5)), self.ORANGE)
+            
+            #draws a orange triangle by calling self.draw_triangle 
+            
+            #draws an orange triangle that mostly occupies the z-plane     
+            self.draw_triangle(((100,100,100), (600,110,140000), (1100,100,5)), self.ORANGE)
             
             #pygame's method of refreshing the screen 
             py.display.flip()
