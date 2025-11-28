@@ -45,7 +45,6 @@ class Renderer():
         self.yaw, self.pitch = 0, 0
         self.u = np.array([0,1,0])
         self.camera_position = np.array([1100,1100,1100])
-        self.f = np.array([0,0,0])
         
         # self.projection_matrix = np.array(
         #     ([ARATIO*FOVRAD,0,0,0],
@@ -132,8 +131,11 @@ class Renderer():
         point = np.array(([x,y,z,w]))
         cam_space = point @ self.view_matrix
         clip_space = cam_space @ self.projection_matrix
-        ndc = ((clip_space) / -clip_space[3])[:2]
+        ndc = ((clip_space) / clip_space[3])[:2]
         new = np.array([SCREENW*(ndc[0]+1)/2, SCREENH*(1-ndc[1])/2])
+
+        print(cam_space[3], clip_space[3])
+        # new = ndc[0]*SCREENW, ndc[1]*SCREENH
         return new
 
     def draw_triangle(self, tri_points):
@@ -183,25 +185,8 @@ class Renderer():
             pygame.event.get()
             self.screen.fill(self.BLACK)
             
-            
-            self.draw_triangle([self.test_points[0],self.test_points[1],self.test_points[4]])
-            self.draw_triangle([self.test_points[4], self.test_points[1], self.test_points[5]])
-            
-            self.draw_triangle([self.test_points[0],self.test_points[1],self.test_points[2]])
-            self.draw_triangle([self.test_points[0], self.test_points[2], self.test_points[4]])
-            
-            self.draw_triangle([self.test_points[4],self.test_points[5],self.test_points[6]])
-            self.draw_triangle([self.test_points[5], self.test_points[6], self.test_points[7]])
-            
-            self.draw_triangle([self.test_points[2],self.test_points[3],self.test_points[6]])
-            self.draw_triangle([self.test_points[6], self.test_points[3], self.test_points[7]])
-            
-            self.draw_triangle([self.test_points[0],self.test_points[2],self.test_points[4]])
-            self.draw_triangle([self.test_points[2], self.test_points[4], self.test_points[6]])
-            
-            self.draw_triangle([self.test_points[1],self.test_points[3],self.test_points[5]])
-            self.draw_triangle([self.test_points[1], self.test_points[5], self.test_points[7]])
-
+            for i in triangles:
+                self.draw_triangle([self.test_points[i[0]],self.test_points[i[1]],self.test_points[i[2]]])
 
 
             self.keys = pygame.key.get_pressed()
@@ -239,6 +224,19 @@ cube = [
 (1700,1300,1700,1),
 (1700,1700,1300,1),
 (1700,1700,1700,1)]
+
+triangles = [(0,2,6),
+(0,6,4),
+(1,5,7),
+(1,7,3),
+(0,1,3),
+(0,3,2),
+(4,6,7),
+(4,7,5),
+        (2,3,7),
+        (2,7,6),
+        (0,4,5),
+        (0,5,1)]
 
 
 game = Renderer(cube)
