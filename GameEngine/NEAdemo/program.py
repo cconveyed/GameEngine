@@ -37,7 +37,7 @@ class Renderer():
         #retrieves the list of vertices and triangles from the model
 
         #an offset vector is added to each vertex of the shape
-        self.vertices = [i + np.array([100,50,100]) for i in self.model[0]]
+        self.vertices = [i + np.array([0,0,-100]) for i in self.model[0]]
         print(self.vertices)
         self.triangles = self.model[1]
 
@@ -60,7 +60,7 @@ class Renderer():
         #camera space --> clip space
         clip_space = point @ self.projection_matrix
         #clip space --> ndc space
-        ndc_space = clip_space / z
+        ndc_space = clip_space / clip_space[3]
         #ndc space --> screen space
         screen_space = ndc_space[0]*self.SCREENW, ndc_space[1]*self.SCREENH
         screen_space = np.array([self.SCREENW*(ndc_space[0]+1)/2, self.SCREENH*(1-ndc_space[1])/2])
@@ -124,7 +124,7 @@ class Renderer():
             # self.draw_triangle(((100,100,100), (600,110,140000), (1100,100,5)), self.ORANGE)
             self.draw_triangle(((200,300,500), (100,300,500), (200,100,500)), self.ORANGE)
 
-            #Runs a loop that draws every triangle that constitutes the shape/model
+            # Runs a loop that draws every triangle that constitutes the shape/model
             # for tri in self.triangles:
             #     self.draw_triangle((self.vertices[tri[0]], self.vertices[tri[1]], self.vertices[tri[2]]), self.ORANGE)
             

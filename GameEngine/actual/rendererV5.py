@@ -191,13 +191,13 @@ class Renderer():
 
             self.keys = pygame.key.get_pressed()
             if self.keys[pygame.K_w]:
-                self.camera_position = self.camera_position + 10
+                self.camera_position = self.camera_position - (1000 * self.f * dt)
             if self.keys[pygame.K_a]:
                 self.camera_position = self.camera_position + (1000 * self.r * dt)
             if self.keys[pygame.K_d]:
                 self.camera_position = self.camera_position - (1000 * self.r * dt)
             if self.keys[pygame.K_s]:
-                self.camera_position = self.camera_position - 10
+                self.camera_position = self.camera_position + (1000 * self.f * dt)
             x1, y1 = pygame.mouse.get_pos()
             dx, dy = x1 - x0, y1 - y0
             x0, y0 = x1, y1
