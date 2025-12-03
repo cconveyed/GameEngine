@@ -175,7 +175,8 @@ class Renderer():
         
         self.rotation_point = (1500,1500,1500,1)
         x0, y0 = 50, 50
-
+        pygame.event.set_grab(True)
+        pygame.mouse.set_visible(0)
         while self.running:
             dt = clock.tick(60) / 1000
     
@@ -187,6 +188,7 @@ class Renderer():
             
             for i in triangles:
                 self.draw_triangle([self.test_points[i[0]],self.test_points[i[1]],self.test_points[i[2]]])
+
 
 
             self.keys = pygame.key.get_pressed()
@@ -201,7 +203,11 @@ class Renderer():
             x1, y1 = pygame.mouse.get_pos()
             dx, dy = x1 - x0, y1 - y0
             x0, y0 = x1, y1
+            
+
+            dx, dy = pygame.mouse.get_rel()
             self.update_yaw_pitch(dx, dy)
+            
             
             
             # pygame.draw.line(self.screen, self.WHITE, self.project(self.rotation_point), self.project(self.test_points[2]))
